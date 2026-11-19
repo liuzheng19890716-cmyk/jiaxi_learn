@@ -139,7 +139,8 @@
     const SPEAK_RATE = 0.8;
     const REPEAT_TIMES = 2;
     const AUTO_PAUSE_MS = 3000;
-    const SPEAK_TIMEOUT_MS = 8000;
+    // 兜底超时按「单条发音」计：汉字和词语各算一条，条目越多总兜底时长越长
+    const SPEAK_TIMEOUT_MS = 4000;
     const CANCEL_SETTLE_MS = 120;
 
     let currentIndex = 0;
@@ -234,17 +235,24 @@
         if (typeof onDone === "function") onDone();
       };
 
-      const character = cards[currentIndex].character;
+      // 每一遍都是「汉字 + 词语」：念完字紧接着追加念词语
+      const card = cards[currentIndex];
+      const texts = [];
       for (let repeat = 0; repeat < REPEAT_TIMES; repeat += 1) {
-        const utterance = new SpeechSynthesisUtterance(character);
+        texts.push(card.character);
+        texts.push(card.word);
+      }
+      texts.forEach((text, position) => {
+        const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = SPEAK_LANG;
         utterance.rate = SPEAK_RATE;
-        if (repeat === REPEAT_TIMES - 1) utterance.onend = finish;
+        // 只有最后一条（末遍的词语）负责收尾，中途条目的 onend 不能触发 finish
+        if (position === texts.length - 1) utterance.onend = finish;
         utterance.onerror = finish;
         window.speechSynthesis.speak(utterance);
-      }
+      });
       // 兜底：回调万一不触发（引擎异常、切后台等），也能复位状态继续往下走
-      watchdogTimer = setTimeout(finish, SPEAK_TIMEOUT_MS);
+      watchdogTimer = setTimeout(finish, SPEAK_TIMEOUT_MS * texts.length);
     }
 
     function updateAutoPlayButton() {
