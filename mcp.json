@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "time-tool": {
+      "command": "python",
+      "args": ["-c", "
+from mcp.server.stdio import stdio_server
+from mcp import Tool
+import datetime
+async def main():
+    async with stdio_server() as (read_stream, write_stream):
+        server = Server(\"time-server\")
+        @server.tool(description=\"获取Windows本地当前时间，不需要参数\")
+        async def get_local_time():
+            now = datetime.datetime.now()
+            return {\"time\": now.strftime('%Y-%m-%d %H:%M:%S')}
+        await server.run(read_stream, write_stream, {Tool})
+if __name__ == '__main__':
+    import asyncio
+    asyncio.run(main())
+"]
+    }
+  }
+}

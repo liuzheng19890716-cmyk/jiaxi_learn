@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>汉字认读卡片</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: #fff8e8;
+      color: #24324a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      display: grid;
+      place-items: center;
+    }
+
+    main {
+      width: min(100%, 900px);
+      display: grid;
+      justify-items: center;
+      gap: 22px;
+    }
+
+    .card {
+      width: 100%;
+      min-height: 420px;
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 5px solid #ffffff;
+      border-radius: 34px;
+      background: #c9efff;
+      box-shadow: 0 10px 0 #b8dce9;
+      text-align: center;
+      transition: background-color 180ms ease;
+    }
+
+    .emoji { font-size: clamp(76px, 18vw, 112px); line-height: 1.15; }
+    .character { margin: 0; font-size: clamp(132px, 35vw, 190px); line-height: 1.05; font-weight: 800; }
+    .pinyin { font-size: 30px; font-weight: 700; }
+    .word { margin-top: 2px; font-size: 36px; font-weight: 700; }
+
+    .actions {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    button {
+      min-height: 88px;
+      padding: 14px 12px;
+      border: 0;
+      border-radius: 24px;
+      color: #193047;
+      font: inherit;
+      font-size: clamp(22px, 5vw, 30px);
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 0 rgba(30, 50, 70, 0.18);
+      touch-action: manipulation;
+    }
+
+    button:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(30, 50, 70, 0.18); }
+    button:focus-visible { outline: 4px solid #24324a; outline-offset: 4px; }
+    button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+    .speak { background: #ffd66b; }
+    .next { background: #aee6a5; }
+    .previous { background: #ffc9b8; }
+    .autoplay { background: #dcc9ff; }
+    .autoplay.is-playing { background: #b795ff; box-shadow: 0 6px 0 rgba(90, 50, 160, 0.35); }
+    .counter { font-size: 24px; font-weight: 700; }
+
+    .reset {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      min-height: 48px;
+      padding: 8px 16px;
+      border-radius: 16px;
+      background: #e2e8f0;
+      font-size: 18px;
+      box-shadow: 0 4px 0 rgba(30, 50, 70, 0.18);
+    }
+
+    @media (max-width: 420px) {
+      body { padding: 16px; }
+      main { gap: 18px; }
+      .card { min-height: 380px; border-radius: 28px; }
+      .actions { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      button { min-height: 76px; }
+    }
+  </style>
+</head>
+<body>
+  <main aria-label="汉字认读卡片">
+    <div class="counter" id="counter" aria-live="polite">第 1 张 / 共 10 张</div>
+    <section class="card" id="card" aria-live="polite" aria-label="当前汉字">
+      <div class="emoji" id="emoji" aria-hidden="true">☀️</div>
+      <h1 class="character" id="character">日</h1>
+      <div class="pinyin" id="pinyin">rì</div>
+      <div class="word" id="word">太阳</div>
+    </section>
+    <div class="actions">
+      <button class="previous" id="previousButton" type="button">上一张</button>
+      <button class="speak" id="speakButton" type="button">读给我听</button>
+      <button class="autoplay" id="autoPlayButton" type="button">▶️ 自动播放</button>
+      <button class="next" id="nextButton" type="button">换一个（下一张）</button>
+    </div>
+  </main>
+  <button class="reset" id="resetButton" type="button">重置</button>
+
+  <script>
+    const cards = [
+      { character: "日", pinyin: "rì", emoji: "☀️", word: "太阳", color: "#c9efff" },
+      { character: "月", pinyin: "yuè", emoji: "🌙", word: "月亮", color: "#e5d9ff" },
+      { character: "山", pinyin: "shān", emoji: "⛰️", word: "大山", color: "#c9f0cf" },
+      { character: "水", pinyin: "shuǐ", emoji: "💧", word: "喝水", color: "#bfe8f5" },
+      { character: "火", pinyin: "huǒ", emoji: "🔥", word: "火苗", color: "#ffd1bd" },
+      { character: "木", pinyin: "mù", emoji: "🌳", word: "大树", color: "#d7edb8" },
+      { character: "人", pinyin: "rén", emoji: "🧑", word: "小朋友", color: "#ffe2aa" },
+      { character: "口", pinyin: "kǒu", emoji: "👄", word: "嘴巴", color: "#ffcbd6" },
+      { character: "手", pinyin: "shǒu", emoji: "✋", word: "小手", color: "#f8dfa8" },
+      { character: "目", pinyin: "mù", emoji: "👀", word: "眼睛", color: "#d5dcff" }
+    ];
+
+    const SPEAK_LANG = "zh-CN";
+    const SPEAK_RATE = 0.8;
+    const REPEAT_TIMES = 2;
+    const AUTO_PAUSE_MS = 3000;
+    const SPEAK_TIMEOUT_MS = 8000;
+    const CANCEL_SETTLE_MS = 120;
+
+    let currentIndex = 0;
+    let isSpeaking = false;
+    let isAutoPlaying = false;
+    let autoRunId = 0;
+    let autoAdvanceTimer = 0;
+    let watchdogTimer = 0;
+    let pendingSpeakTimer = 0;
+
+    const speakButton = document.getElementById("speakButton");
+    const autoPlayButton = document.getElementById("autoPlayButton");
+    const nextButton = document.getElementById("nextButton");
+    const previousButton = document.getElementById("previousButton");
+    const resetButton = document.getElementById("resetButton");
+    const cardElement = document.getElementById("card");
+    const emojiElement = document.getElementById("emoji");
+    const characterElement = document.getElementById("character");
+    const pinyinElement = document.getElementById("pinyin");
+    const wordElement = document.getElementById("word");
+    const counterElement = document.getElementById("counter");
+
+    function supportsSpeech() {
+      return "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+    }
+
+    function clearTimers() {
+      if (autoAdvanceTimer) {
+        clearTimeout(autoAdvanceTimer);
+        autoAdvanceTimer = 0;
+      }
+      if (watchdogTimer) {
+        clearTimeout(watchdogTimer);
+        watchdogTimer = 0;
+      }
+      if (pendingSpeakTimer) {
+        clearTimeout(pendingSpeakTimer);
+        pendingSpeakTimer = 0;
+      }
+    }
+
+    // 统一收尾：清定时器 + 停语音。cancel() 必须在能力检测之后调用，
+    // 否则不支持语音的浏览器会在这里抛错，导致后续翻页代码执行不到。
+    function stopSpeech() {
+      clearTimers();
+      if (supportsSpeech()) window.speechSynthesis.cancel();
+      isSpeaking = false;
+    }
+
+    function showCard() {
+      const card = cards[currentIndex];
+      emojiElement.textContent = card.emoji;
+      characterElement.textContent = card.character;
+      pinyinElement.textContent = card.pinyin;
+      wordElement.textContent = card.word;
+      cardElement.style.backgroundColor = card.color;
+      counterElement.textContent = `第 ${currentIndex + 1} 张 / 共 ${cards.length} 张`;
+    }
+
+    function step(delta) {
+      currentIndex = (currentIndex + delta + cards.length) % cards.length;
+      showCard();
+    }
+
+    function goTo(index) {
+      currentIndex = ((index % cards.length) + cards.length) % cards.length;
+      showCard();
+    }
+
+    function isBusy() {
+      if (!supportsSpeech()) return false;
+      return isSpeaking || window.speechSynthesis.speaking || window.speechSynthesis.pending;
+    }
+
+    // force = true 时跳过忙碌守卫，供刚执行过 cancel() 的调用方使用。
+    // settled 保证 onend / onerror / watchdog 只会让朗读收尾一次。
+    function speakCard(onDone, force) {
+      if (!supportsSpeech()) return;
+      if (!force && isBusy()) return;
+
+      isSpeaking = true;
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        if (watchdogTimer) {
+          clearTimeout(watchdogTimer);
+          watchdogTimer = 0;
+        }
+        isSpeaking = false;
+        if (typeof onDone === "function") onDone();
+      };
+
+      const character = cards[currentIndex].character;
+      for (let repeat = 0; repeat < REPEAT_TIMES; repeat += 1) {
+        const utterance = new SpeechSynthesisUtterance(character);
+        utterance.lang = SPEAK_LANG;
+        utterance.rate = SPEAK_RATE;
+        if (repeat === REPEAT_TIMES - 1) utterance.onend = finish;
+        utterance.onerror = finish;
+        window.speechSynthesis.speak(utterance);
+      }
+      // 兜底：回调万一不触发（引擎异常、切后台等），也能复位状态继续往下走
+      watchdogTimer = setTimeout(finish, SPEAK_TIMEOUT_MS);
+    }
+
+    function updateAutoPlayButton() {
+      autoPlayButton.textContent = isAutoPlaying ? "⏹️ 停止" : "▶️ 自动播放";
+      autoPlayButton.classList.toggle("is-playing", isAutoPlaying);
+    }
+
+    function stopAutoPlay() {
+      autoRunId += 1; // 让所有在途回调失效
+      if (!isAutoPlaying) return;
+      isAutoPlaying = false;
+      clearTimers();
+      updateAutoPlayButton();
+    }
+
+    function scheduleNext(runId) {
+      if (!isAutoPlaying || runId !== autoRunId) return;
+      autoAdvanceTimer = setTimeout(() => {
+        autoAdvanceTimer = 0;
+        if (!isAutoPlaying || runId !== autoRunId) return;
+        step(1);
+        playAuto(runId);
+      }, AUTO_PAUSE_MS);
+    }
+
+    function playAuto(runId) {
+      if (!isAutoPlaying || runId !== autoRunId) return;
+      speakCard(() => scheduleNext(runId), true);
+    }
+
+    function startAutoPlay() {
+      const wasBusy = isBusy();
+      stopAutoPlay();
+      stopSpeech();
+      autoRunId += 1;
+      const runId = autoRunId;
+      isAutoPlaying = true;
+      updateAutoPlayButton();
+      // 刚 cancel 过，等引擎清空队列再开口，否则新语音会被忙碌守卫拦住
+      if (wasBusy) {
+        autoAdvanceTimer = setTimeout(() => {
+          autoAdvanceTimer = 0;
+          playAuto(runId);
+        }, CANCEL_SETTLE_MS);
+      } else {
+        playAuto(runId);
+      }
+    }
+
+    // 手动操作一律优先于自动播放，不和孩子抢控制权
+    function handleManualClick() {
+      stopAutoPlay();
+      stopSpeech();
+    }
+
+    speakButton.addEventListener("click", () => {
+      const wasBusy = isBusy();
+      handleManualClick();
+      // 正在朗读时再点一下：先 cancel 停掉，等引擎清空队列后重读当前字，
+      // 否则会被忙碌守卫静默拦掉，变成"点了只停不读"。
+      if (wasBusy) {
+        pendingSpeakTimer = setTimeout(() => {
+          pendingSpeakTimer = 0;
+          speakCard(null, true);
+        }, CANCEL_SETTLE_MS);
+      } else {
+        speakCard();
+      }
+    });
+
+    autoPlayButton.addEventListener("click", () => {
+      if (isAutoPlaying) {
+        handleManualClick();
+        return;
+      }
+      startAutoPlay();
+    });
+
+    nextButton.addEventListener("click", () => {
+      handleManualClick();
+      step(1);
+    });
+
+    previousButton.addEventListener("click", () => {
+      handleManualClick();
+      step(-1);
+    });
+
+    resetButton.addEventListener("click", () => {
+      handleManualClick();
+      goTo(0);
+    });
+
+    if (!supportsSpeech()) {
+      speakButton.disabled = true;
+      speakButton.textContent = "暂不支持语音";
+      autoPlayButton.disabled = true;
+      autoPlayButton.textContent = "暂不支持语音";
+    }
+
+    showCard();
+  </script>
+</body>
+</html>
