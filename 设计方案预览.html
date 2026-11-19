@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>汉字认读卡片 · UI 设计方案预览</title>
+<style>
+/* ===================== 预览页外壳 ===================== */
+:root{
+  color-scheme: light;
+  font-family:"Microsoft YaHei","PingFang SC",sans-serif;
+  --chrome-bg:#f2f4f8; --panel:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:32px 20px 64px;background:var(--chrome-bg);color:var(--ink);line-height:1.6}
+.wrap{max-width:1320px;margin:0 auto}
+header.page{margin-bottom:28px}
+header.page h1{margin:0 0 6px;font-size:30px;letter-spacing:.5px}
+header.page p{margin:0;color:var(--muted);font-size:15px}
+.badge{display:inline-block;margin-bottom:10px;padding:4px 12px;border-radius:999px;background:#1f2937;color:#fff;font-size:12px;font-weight:700;letter-spacing:1px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:22px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 2px 12px rgba(16,24,40,.05)}
+.panel-head{margin-bottom:14px}
+.tag{display:inline-block;padding:3px 10px;border-radius:8px;font-size:12px;font-weight:800;letter-spacing:.5px;background:#eef2ff;color:#4338ca}
+.panel-head h2{margin:8px 0 2px;font-size:21px}
+.panel-head .sub{margin:0;color:var(--muted);font-size:13.5px}
+.points{margin:14px 0 0;padding:0 0 0 18px;font-size:13.5px;color:#374151}
+.points li{margin-bottom:5px}
+.points li b{color:#111827}
+
+.sec{margin-top:34px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px}
+.sec h3{margin:0 0 14px;font-size:19px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{background:#f8fafc;font-weight:700}
+td.good{color:#166534}
+td.warn{color:#9a3412}
+
+/* ===================== 手机外框 ===================== */
+.frame{
+  position:relative;width:100%;max-width:372px;margin:0 auto;padding:20px 16px 24px;
+  border-radius:30px;background:var(--page-bg);overflow:hidden;isolation:isolate;
+  border:1px solid rgba(0,0,0,.06);
+}
+.frame::before{ /* 装饰层，方案各自定义 */
+  content:"";position:absolute;inset:0;background:var(--deco,none);opacity:var(--deco-op,0);pointer-events:none;
+}
+.frame>*{position:relative;z-index:1}
+
+/* ---------- 共享结构（视觉由 CSS 变量驱动） ---------- */
+.counter{font-size:var(--counter-size,15px);font-weight:700;color:var(--ink-soft);text-align:center;
+  margin-bottom:12px;padding:var(--counter-pad,0);background:var(--counter-bg,transparent);
+  border-radius:var(--counter-radius,0);display:inline-block;width:var(--counter-w,100%)}
+.counter-row{display:flex;justify-content:center}
+
+.card{
+  min-height:var(--card-h,336px);padding:18px 12px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:var(--card-gap,4px);text-align:center;
+  border-radius:var(--card-radius,30px);background:var(--card-bg);border:var(--card-border,0);
+  box-shadow:var(--card-shadow,none);transition:background-color .2s ease;
+}
+.emoji{font-size:var(--emoji-size,58px);line-height:1.15}
+.emoji-pad{width:var(--emoji-pad,0);height:var(--emoji-pad,0);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:var(--emoji-pad-bg,transparent);
+  margin-bottom:var(--emoji-pad-mb,0)}
+.char{margin:0;font-family:var(--char-font);font-size:var(--char-size,126px);font-weight:var(--char-weight,800);
+  line-height:1.02;color:var(--ink);text-shadow:var(--char-shadow,none);letter-spacing:var(--char-ls,0)}
+.pinyin{font-size:var(--pinyin-size,20px);font-weight:700;color:var(--ink-soft);letter-spacing:.5px}
+.word{font-size:var(--word-size,24px);font-weight:var(--word-weight,700);color:var(--ink);margin-top:2px}
+.band{height:var(--band-h,0);border-radius:var(--band-radius,0);background:var(--band-bg,transparent);
+  width:100%;margin-bottom:var(--band-mb,0)}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:var(--btn-gap,11px);margin-top:var(--actions-mt,15px)}
+.btn{
+  min-height:var(--btn-h,72px);padding:8px 6px;border:var(--btn-border,0);border-radius:var(--btn-radius,20px);
+  font-family:inherit;font-size:var(--btn-size,19px);font-weight:var(--btn-weight,800);color:var(--btn-ink);
+  cursor:pointer;touch-action:manipulation;box-shadow:var(--btn-shadow,none);
+  display:flex;flex-direction:var(--btn-dir,row);align-items:center;justify-content:center;gap:var(--btn-gap-in,6px);
+  transition:transform .08s ease,box-shadow .08s ease;
+}
+.btn .ico{font-size:var(--btn-ico,22px);line-height:1}
+.btn:active{transform:translateY(var(--btn-press,3px));box-shadow:var(--btn-shadow-active,var(--btn-shadow,none))}
+.btn.on{background:var(--c-auto-on);color:var(--btn-ink-on,var(--btn-ink))}
+
+.reset{position:absolute;z-index:3}
+.hint{position:absolute;z-index:4;font-size:11px;font-weight:800;color:#b91c1c;background:#fff1f2;
+  border:1.5px dashed #f87171;border-radius:8px;padding:2px 6px;pointer-events:none}
+
+/* 进度圆点（方案 A） */
+.dots{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--dot-off);transition:all .18s ease}
+.dots i.on{width:22px;border-radius:6px;background:var(--dot-on)}
+
+/* 彩虹进度条（方案 C） */
+.rainbow{display:flex;gap:3px;justify-content:center;margin-bottom:12px;align-items:flex-end;height:16px}
+.rainbow i{width:100%;max-width:26px;height:7px;border-radius:4px;opacity:.32;transition:all .2s ease}
+.rainbow i.on{height:15px;opacity:1;transform:scaleY(1.06)}
+
+/* ===================== 现状 ===================== */
+.demo-now{
+  --page-bg:#fff8e8; --ink:#24324a; --ink-soft:#24324a;
+  --card-radius:34px; --card-border:5px solid #fff; --card-shadow:0 10px 0 #b8dce9; --card-h:336px;
+  --char-font:"Microsoft YaHei","PingFang SC",sans-serif; --char-size:126px; --char-weight:800;
+  --emoji-size:58px; --pinyin-size:20px; --word-size:24px;
+  --btn-radius:24px; --btn-h:72px; --btn-size:19px; --btn-ink:#193047; --btn-shadow:0 6px 0 rgba(30,50,70,.18);
+  --btn-shadow-active:0 2px 0 rgba(30,50,70,.18); --counter-size:15px;
+}
+.demo-now .c-prev{background:#ffc9b8}.demo-now .c-speak{background:#ffd66b}
+.demo-now .c-auto{background:#dcc9ff;--c-auto-on:#b795ff}.demo-now .c-next{background:#aee6a5}
+.demo-now .reset{right:16px;bottom:16px;min-height:40px;padding:6px 14px;border-radius:14px;
+  background:#e2e8f0;border:0;font-size:15px;font-weight:800;color:#193047;cursor:pointer;
+  box-shadow:0 4px 0 rgba(30,50,70,.18);font-family:inherit}
+
+/* ===================== 方案 A · 糖果乐园 ===================== */
+.demo-a{
+  --page-bg:linear-gradient(170deg,#fff3f7 0%,#fef7ea 52%,#eef8ff 100%);
+  --deco:radial-gradient(circle at 12% 8%,rgba(255,182,193,.45) 0 5px,transparent 6px),
+         radial-gradient(circle at 86% 14%,rgba(186,220,255,.5) 0 6px,transparent 7px),
+         radial-gradient(circle at 22% 92%,rgba(255,226,150,.5) 0 5px,transparent 6px),
+         radial-gradient(circle at 78% 84%,rgba(200,240,205,.5) 0 6px,transparent 7px);
+  --deco-op:1;
+  --ink:#3b3560; --ink-soft:#7b7396;
+  --card-radius:36px; --card-border:6px solid #fff; --card-shadow:0 12px 0 rgba(59,53,96,.10),0 18px 34px rgba(59,53,96,.08);
+  --card-h:344px; --card-gap:3px;
+  --char-font:"Microsoft YaHei","PingFang SC",sans-serif; --char-size:138px; --char-weight:800;
+  --char-shadow:0 3px 0 rgba(255,255,255,.75);
+  --emoji-size:60px; --emoji-pad:96px; --emoji-pad-bg:rgba(255,255,255,.62); --emoji-pad-mb:6px;
+  --pinyin-size:20px; --word-size:25px; --word-weight:800;
+  --btn-radius:22px; --btn-h:76px; --btn-size:20px; --btn-ico:23px; --btn-ink:#43365f;
+  --btn-border:3px solid rgba(255,255,255,.85); --btn-press:4px;
+  --dot-off:rgba(123,115,150,.26); --dot-on:#ff9db4;
+  --reset-size:44px;
+}
+.demo-a .c-prev{background:#ffcdbd;--d:#e79e88}
+.demo-a .c-speak{background:#ffe294;--d:#e0b458}
+.demo-a .c-auto{background:#dcc8ff;--d:#b08de8;--c-auto-on:#b795ff}
+.demo-a .c-next{background:#bcecc0;--d:#8bc98f}
+.demo-a .btn{box-shadow:0 7px 0 var(--d)}
+.demo-a .btn:active{box-shadow:0 2px 0 var(--d)}
+.demo-a .reset{right:14px;top:14px;width:var(--reset-size);height:var(--reset-size);border-radius:50%;
+  background:rgba(255,255,255,.9);border:2px solid rgba(67,54,95,.14);font-size:19px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 rgba(67,54,95,.12)}
+
+/* ===================== 方案 B · 森林绘本 ===================== */
+.demo-b{
+  --page-bg:#f7f0e3;
+  --deco:repeating-linear-gradient(90deg,rgba(160,132,90,.05) 0 1px,transparent 1px 7px);
+  --deco-op:1;
+  --ink:#4a3f33; --ink-soft:#8b7b67;
+  --card-radius:22px; --card-border:9px solid #e6d8bf; --card-shadow:0 6px 18px rgba(120,96,60,.14);
+  --card-h:346px; --card-gap:2px; --card-bg:#fffdf6;
+  --char-font:"楷体","KaiTi","STKaiti","Microsoft YaHei",serif; --char-size:150px; --char-weight:400; --char-ls:2px;
+  --emoji-size:54px; --pinyin-size:19px; --word-size:23px; --word-weight:700;
+  --btn-radius:999px; --btn-h:70px; --btn-size:19px; --btn-ico:21px; --btn-ink:#4a3f33;
+  --btn-border:2px solid rgba(74,63,51,.22); --btn-press:2px;
+  --btn-shadow:0 3px 8px rgba(120,96,60,.20); --btn-shadow-active:0 1px 3px rgba(120,96,60,.22);
+  --counter-size:14px; --counter-pad:5px 14px; --counter-bg:rgba(255,253,246,.85);
+  --counter-radius:999px; --counter-w:auto; --counter-border:1px solid rgba(74,63,51,.14);
+}
+.demo-b .c-prev{background:#f3cba4}.demo-b .c-speak{background:#f8e2a8}
+.demo-b .c-auto{background:#dcd0ea;--c-auto-on:#c0aede}.demo-b .c-next{background:#cfe3bd}
+.demo-b .leaf{position:absolute;font-size:26px;opacity:.30;z-index:0}
+.demo-b .reset{left:50%;transform:translateX(-50%);bottom:12px;background:transparent;border:0;
+  font-size:14px;font-weight:700;color:#8b7b67;cursor:pointer;font-family:inherit;padding:4px 10px;
+  border-radius:999px;text-decoration:underline;text-underline-offset:3px}
+
+/* ===================== 方案 C · 彩虹乐园 ===================== */
+.demo-c{
+  --page-bg:linear-gradient(180deg,#eef7ff 0%,#f4f1ff 100%);
+  --ink:#2b3a55; --ink-soft:#7c8aa5;
+  --card-radius:28px; --card-border:0; --card-shadow:0 10px 26px rgba(43,58,85,.12); --card-bg:#ffffff;
+  --card-h:330px; --card-gap:2px; --card-pad:0;
+  --char-font:"Microsoft YaHei","PingFang SC",sans-serif; --char-size:132px; --char-weight:800;
+  --emoji-size:52px; --emoji-pad:88px; --emoji-pad-bg:#f2f7ff; --emoji-pad-mb:4px;
+  --pinyin-size:19px; --word-size:24px; --word-weight:800;
+  --band-h:12px; --band-radius:28px 28px 0 0; --band-mb:0;
+  --btn-radius:24px; --btn-h:84px; --btn-size:17px; --btn-ico:30px; --btn-dir:column; --btn-gap-in:3px;
+  --btn-ink:#fff; --btn-press:3px; --btn-weight:800;
+}
+.demo-c .c-prev{background:#ff9d7a;--d:#e07a58}
+.demo-c .c-speak{background:#ffc247;--d:#e0a22c}
+.demo-c .c-auto{background:#a98cf0;--d:#8a6bd6;--c-auto-on:#7d5ce0}
+.demo-c .c-next{background:#5fc9a8;--d:#43a98a}
+.demo-c .btn{box-shadow:0 6px 0 var(--d)}
+.demo-c .btn:active{box-shadow:0 2px 0 var(--d)}
+.demo-c .btn .ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.14))}
+.demo-c .reset{right:14px;top:14px;width:40px;height:40px;border-radius:14px;background:#fff;border:0;
+  font-size:17px;cursor:pointer;box-shadow:0 3px 8px rgba(43,58,85,.14);display:flex;align-items:center;justify-content:center}
+.demo-c .card{padding:0;overflow:hidden}
+.demo-c .card-in{padding:16px 12px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;flex:1}
+
+.note-strip{margin-top:12px;font-size:12.5px;color:var(--muted);text-align:center}
+@media (max-width:520px){ body{padding:20px 12px 48px} .grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page">
+  <span class="badge">UI 设计评审稿 · 不含发音</span>
+  <h1>汉字认读卡片 · 三套视觉方案</h1>
+  <p>下面是当前版本与三套新方案的实景对比（均为 372px 宽的手机/竖屏比例）。<b>每个方案的按钮都可以点</b>：翻页、进度、自动播放节奏都能实际感受（自动播放为无声演示，只为看节奏）。index.html 尚未改动。</p>
+</header>
+
+<div class="grid">
+
+  <!-- ============ 现状 ============ -->
+  <article class="panel">
+    <div class="panel-head">
+      <span class="tag" style="background:#f3f4f6;color:#6b7280">现状</span>
+      <h2>当前版本</h2>
+      <p class="sub">扁平淡色块 + 纯文字计数 + 右下角浮动重置</p>
+    </div>
+    <div class="frame demo-now" data-demo="now">
+      <div class="counter" data-counter>第 1 张 / 共 10 张</div>
+      <section class="card" data-card>
+        <div class="emoji" data-emoji>☀️</div>
+        <h1 class="char" data-char>日</h1>
+        <div class="pinyin" data-pinyin>rì</div>
+        <div class="word" data-word>太阳</div>
+      </section>
+      <div class="actions">
+        <button class="btn c-prev" data-prev type="button">上一张</button>
+        <button class="btn c-speak" data-speak type="button">读给我听</button>
+        <button class="btn c-auto" data-auto type="button">▶️ 自动播放</button>
+        <button class="btn c-next" data-next type="button">换一个（下一张）</button>
+      </div>
+      <button class="reset" data-reset type="button">重置</button>
+      <span class="hint" style="right:12px;bottom:60px">遮挡「下一张」</span>
+    </div>
+    <ul class="points">
+      <li><b>问题 1</b>：重置按钮固定在右下角，窄屏下压在「换一个」上，孩子想翻页会误触重置。</li>
+      <li><b>问题 2</b>：按钮全靠颜色区分、无图标，不识字的孩子分不清哪个是哪个。</li>
+      <li><b>问题 3</b>：「换一个（下一张）」双名称，违反自家「提示文字简短」的规范。</li>
+      <li><b>问题 4</b>：卡片、按钮、背景全是同明度淡色块，缺层次，视觉上「平贴」。</li>
+    </ul>
+  </article>
+
+  <!-- ============ 方案 A ============ -->
+  <article class="panel">
+    <div class="panel-head">
+      <span class="tag">方案 A · 推荐</span>
+      <h2>糖果乐园</h2>
+      <p class="sub">立体糖果按钮 + 圆点进度 + Emoji 圆形底托</p>
+    </div>
+    <div class="frame demo-a" data-demo="a">
+      <button class="reset" data-reset type="button" title="回到第一张">🏠</button>
+      <div class="dots" data-dots></div>
+      <section class="card" data-card>
+        <div class="emoji-pad"><div class="emoji" data-emoji>☀️</div></div>
+        <h1 class="char" data-char>日</h1>
+        <div class="pinyin" data-pinyin>rì</div>
+        <div class="word" data-word>太阳</div>
+      </section>
+      <div class="actions">
+        <button class="btn c-prev" data-prev type="button"><span class="ico">⬅️</span>上一张</button>
+        <button class="btn c-speak" data-speak type="button"><span class="ico">🔊</span>读一读</button>
+        <button class="btn c-auto" data-auto type="button"><span class="ico">▶️</span>自动播放</button>
+        <button class="btn c-next" data-next type="button"><span class="ico">➡️</span>下一张</button>
+      </div>
+    </div>
+    <ul class="points">
+      <li><b>立体糖果按钮</b>：白描边 + 7px 同色厚底阴影，按下下沉 4px，触感反馈最强，幼儿最容易理解「按下去了」。</li>
+      <li><b>圆点进度</b>：10 个点、当前点拉长成胶囊，不识字也能看出「还剩多少」。</li>
+      <li><b>重置移到右上角</b>：变成 44px 的 🏠 圆钮，远离主操作区，遮挡问题彻底消失。</li>
+      <li><b>Emoji 圆形底托</b>：图案有承载面，不再悬空，卡片更像一张贴纸。</li>
+      <li><b>背景</b>：奶油三色渐变 + 四角淡彩圆点，柔和不抢注意力。</li>
+    </ul>
+  </article>
+
+  <!-- ============ 方案 B ============ -->
+  <article class="panel">
+    <div class="panel-head">
+      <span class="tag" style="background:#fef3e2;color:#92600a">方案 B</span>
+      <h2>森林绘本</h2>
+      <p class="sub">纸质绘本质感 + 楷体大字 + 胶囊按钮</p>
+    </div>
+    <div class="frame demo-b" data-demo="b">
+      <span class="leaf" style="left:14px;top:16px">🌿</span>
+      <span class="leaf" style="right:16px;top:74px">🍄</span>
+      <span class="leaf" style="left:20px;bottom:86px">🌱</span>
+      <div class="counter-row"><div class="counter" data-counter>第 1 张 / 共 10 张</div></div>
+      <section class="card" data-card>
+        <div class="emoji" data-emoji>☀️</div>
+        <h1 class="char" data-char>日</h1>
+        <div class="pinyin" data-pinyin>rì</div>
+        <div class="word" data-word>太阳</div>
+      </section>
+      <div class="actions">
+        <button class="btn c-prev" data-prev type="button"><span class="ico">⬅️</span>上一张</button>
+        <button class="btn c-speak" data-speak type="button"><span class="ico">🔊</span>读一读</button>
+        <button class="btn c-auto" data-auto type="button"><span class="ico">▶️</span>自动播放</button>
+        <button class="btn c-next" data-next type="button"><span class="ico">➡️</span>下一张</button>
+      </div>
+      <button class="reset" data-reset type="button">🏠 回到第一张</button>
+    </div>
+    <ul class="points">
+      <li><b>楷体大字</b>：楷体笔画形态最接近教材与手写体，<b>对幼儿识字最友好</b>——这是三套方案里唯一用楷体的。代价是 Windows 楷体无粗体字重，只能用常规字重靠字号撑气势。</li>
+      <li><b>绘本质感</b>：米纸底 + 极淡竖纹 + 9px 木色画框，卡片像绘本内页，气质安静、不刺激。</li>
+      <li><b>胶囊按钮</b>：圆角到底、2px 深棕描边 + 柔和投影，比 A 内敛。</li>
+      <li><b>重置弱化</b>：变成底部居中的下划线小文字，孩子几乎不会误触（但也意味着大人要找一下）。</li>
+      <li><b>取舍</b>：视觉冲击力和「好玩感」弱于 A、C，更适合安静亲子共读场景。</li>
+    </ul>
+  </article>
+
+  <!-- ============ 方案 C ============ -->
+  <article class="panel">
+    <div class="panel-head">
+      <span class="tag" style="background:#e8f7f1;color:#0f766e">方案 C</span>
+      <h2>彩虹乐园</h2>
+      <p class="sub">彩虹进度条 + 图标在上文字在下 + 彩色色带卡片</p>
+    </div>
+    <div class="frame demo-c" data-demo="c">
+      <button class="reset" data-reset type="button" title="回到第一张">🏠</button>
+      <div class="rainbow" data-rainbow></div>
+      <section class="card" data-card>
+        <div class="band" data-band></div>
+        <div class="card-in">
+          <div class="emoji-pad"><div class="emoji" data-emoji>☀️</div></div>
+          <h1 class="char" data-char>日</h1>
+          <div class="pinyin" data-pinyin>rì</div>
+          <div class="word" data-word>太阳</div>
+        </div>
+      </section>
+      <div class="actions">
+        <button class="btn c-prev" data-prev type="button"><span class="ico">⬅️</span>上一张</button>
+        <button class="btn c-speak" data-speak type="button"><span class="ico">🔊</span>读一读</button>
+        <button class="btn c-auto" data-auto type="button"><span class="ico">▶️</span>自动播放</button>
+        <button class="btn c-next" data-next type="button"><span class="ico">➡️</span>下一张</button>
+      </div>
+    </div>
+    <ul class="points">
+      <li><b>彩虹进度条</b>：10 段彩虹色，当前段变高变实，进度感最强、最像主流儿童 App。</li>
+      <li><b>图标在上、文字在下</b>：84px 高的按钮，图标 30px，<b>不识字也能靠图标操作</b>，识别性三套中最好。</li>
+      <li><b>白卡 + 顶部色带</b>：卡片纯白，顶部一条当前字的主色色带，色彩集中在进度条和按钮上，主次分明。</li>
+      <li><b>深色按钮 + 白字</b>：对比度最高，但饱和度也最高，长时间看可能偏兴奋。</li>
+      <li><b>取舍</b>：彩虹条装饰性较强，若担心分散注意力可改成单色进度条。</li>
+    </ul>
+  </article>
+</div>
+
+<!-- ============ 三套方案共同的改进 ============ -->
+<section class="sec">
+  <h3>三套方案都会一并解决的问题（与配色无关）</h3>
+  <table>
+    <tr><th style="width:22%">项目</th><th style="width:34%">现状</th><th>改后</th></tr>
+    <tr><td><b>重置按钮位置</b></td><td class="warn">固定右下角，窄屏遮挡「下一张」，误触即丢进度</td><td class="good">移出主操作区（A/C 右上角图标钮，B 底部弱化文字），遮挡消除</td></tr>
+    <tr><td><b>按钮可识别性</b></td><td class="warn">纯文字，靠颜色区分</td><td class="good">Emoji 图标 + 文字双通道，不识字也能操作</td></tr>
+    <tr><td><b>提示文字</b></td><td class="warn">「换一个（下一张）」双名称</td><td class="good">统一为「下一张」，符合 AGENTS.md「提示文字简短」</td></tr>
+    <tr><td><b>进度呈现</b></td><td class="warn">纯文字「第 1 张 / 共 10 张」，幼儿读不懂</td><td class="good">可视化进度（A 圆点 / B 文字胶囊 / C 彩虹条）</td></tr>
+    <tr><td><b>视觉层次</b></td><td class="warn">背景、卡片、按钮同明度，平贴无纵深</td><td class="good">背景淡 → 卡片亮 → 按钮饱和，三级明度差 + 厚底阴影</td></tr>
+    <tr><td><b>发音中反馈</b></td><td class="warn">朗读时点按钮被静默拦截，无任何变化</td><td class="good">「读一读」朗读中显示 🔊 跳动 + 禁用态（需少量 JS）</td></tr>
+  </table>
+</section>
+
+<!-- ============ 横向对比 ============ -->
+<section class="sec">
+  <h3>横向对比与改动成本</h3>
+  <table>
+    <tr>
+      <th style="width:18%">维度</th>
+      <th style="width:27%">A · 糖果乐园</th>
+      <th style="width:27%">B · 森林绘本</th>
+      <th style="width:28%">C · 彩虹乐园</th>
+    </tr>
+    <tr><td><b>气质</b></td><td>甜、软、玩具感</td><td>安静、温暖、书卷气</td><td>明快、现代、App 感</td></tr>
+    <tr><td><b>汉字字体</b></td><td>雅黑加粗（厚重醒目）</td><td class="good">楷体（识字最友好）</td><td>雅黑加粗</td></tr>
+    <tr><td><b>按钮反馈强度</b></td><td class="good">最强（下沉 4px + 厚底）</td><td>中等（下沉 2px + 柔影）</td><td class="good">强（下沉 3px + 厚底）</td></tr>
+    <tr><td><b>不识字可操作</b></td><td>可（图标+文字）</td><td>可（图标+文字）</td><td class="good">最好（大图标竖排）</td></tr>
+    <tr><td><b>色彩刺激度</b></td><td class="good">低（柔和粉彩）</td><td class="good">最低（大地色）</td><td class="warn">较高（饱和色 + 彩虹）</td></tr>
+    <tr><td><b>改动量</b></td><td class="good">只改 CSS + 少量 HTML</td><td class="good">只改 CSS + 少量 HTML</td><td>改 CSS + HTML 结构稍多（色带、竖排按钮）</td></tr>
+    <tr><td><b>需要动 JS</b></td><td colspan="3">三套都只需新增「渲染进度指示」约 10 行；已验证的自动播放状态机、语音逻辑、词表<b>一律不动</b></td></tr>
+    <tr><td><b>主要风险</b></td><td>粉彩配色偏「女孩向」的刻板印象，可调成中性色</td><td>楷体无粗体字重，小屏上气势略弱</td><td>彩虹条可能分散注意力；深色按钮久看偏兴奋</td></tr>
+  </table>
+  <p class="note-strip">我的建议：3 岁幼儿优先 <b>方案 A</b>（按钮反馈最强、色彩最柔和、进度最直观）；若你更看重识字规范性，<b>方案 B 的楷体</b>值得单独采纳——也可以「A 的整体视觉 + B 的楷体汉字」混搭。方案 C 适合你想要更像市面儿童 App 的观感。</p>
+</section>
+
+</div>
+
+<script>
+// 与 index.html 完全一致的词表（含各自的主题色）
+const cards = [
+  { character:"日", pinyin:"rì",   emoji:"☀️", word:"太阳",   color:"#c9efff", accent:"#ff9db4" },
+  { character:"月", pinyin:"yuè",  emoji:"🌙", word:"月亮",   color:"#e5d9ff", accent:"#b795ff" },
+  { character:"山", pinyin:"shān", emoji:"⛰️", word:"大山",   color:"#c9f0cf", accent:"#7cc98a" },
+  { character:"水", pinyin:"shuǐ", emoji:"💧", word:"喝水",   color:"#bfe8f5", accent:"#6fc4e8" },
+  { character:"火", pinyin:"huǒ",  emoji:"🔥", word:"火苗",   color:"#ffd1bd", accent:"#ff8f6b" },
+  { character:"木", pinyin:"mù",   emoji:"🌳", word:"大树",   color:"#d7edb8", accent:"#9cc95f" },
+  { character:"人", pinyin:"rén",  emoji:"🧑", word:"小朋友", color:"#ffe2aa", accent:"#f0b45e" },
+  { character:"口", pinyin:"kǒu",  emoji:"👄", word:"嘴巴",   color:"#ffcbd6", accent:"#f78ba8" },
+  { character:"手", pinyin:"shǒu", emoji:"✋", word:"小手",   color:"#f8dfa8", accent:"#e6c15f" },
+  { character:"目", pinyin:"mù",   emoji:"👀", word:"眼睛",   color:"#d5dcff", accent:"#8fa2f0" }
+];
+
+const RAINBOW = ["#ff8f8f","#ffb36b","#ffe066","#9be08a","#7fd4e8","#a98cf0","#f0a0d0","#8fb6f0","#7fd4c0","#ffc46b"];
+const AUTO_DEMO_MS = 3400; // 无声演示：读两遍约 1.6s + 停顿 3s 的近似节奏
+
+document.querySelectorAll(".frame").forEach((frame) => {
+  const kind = frame.dataset.demo;
+  let index = 0;
+  let autoTimer = 0;
+  let autoOn = false;
+
+  const q = (sel) => frame.querySelector(sel);
+  const cardEl = q("[data-card]");
+  const emojiEl = q("[data-emoji]");
+  const charEl = q("[data-char]");
+  const pinyinEl = q("[data-pinyin]");
+  const wordEl = q("[data-word]");
+  const counterEl = q("[data-counter]");
+  const dotsEl = q("[data-dots]");
+  const rainbowEl = q("[data-rainbow]");
+  const bandEl = q("[data-band]");
+  const autoBtn = q("[data-auto]");
+  const speakBtn = q("[data-speak]");
+
+  // 构建进度指示
+  if (dotsEl) {
+    for (let i = 0; i < cards.length; i++) dotsEl.appendChild(document.createElement("i"));
+  }
+  if (rainbowEl) {
+    for (let i = 0; i < cards.length; i++) {
+      const seg = document.createElement("i");
+      seg.style.background = RAINBOW[i];
+      rainbowEl.appendChild(seg);
+    }
+  }
+
+  function render() {
+    const c = cards[index];
+    emojiEl.textContent = c.emoji;
+    charEl.textContent = c.character;
+    pinyinEl.textContent = c.pinyin;
+    wordEl.textContent = c.word;
+
+    if (kind === "now") {
+      cardEl.style.backgroundColor = c.color;
+      counterEl.textContent = "第 " + (index + 1) + " 张 / 共 " + cards.length + " 张";
+    } else if (kind === "a") {
+      cardEl.style.backgroundColor = c.color;
+      dotsEl.querySelectorAll("i").forEach((d, i) => d.classList.toggle("on", i === index));
+    } else if (kind === "b") {
+      counterEl.textContent = "第 " + (index + 1) + " 张 / 共 " + cards.length + " 张";
+    } else if (kind === "c") {
+      bandEl.style.background = c.accent;
+      emojiEl.parentElement.style.background = c.color;
+      rainbowEl.querySelectorAll("i").forEach((s, i) => s.classList.toggle("on", i === index));
+    }
+  }
+
+  function stopAuto() {
+    if (autoTimer) { clearInterval(autoTimer); autoTimer = 0; }
+    autoOn = false;
+    autoBtn.classList.remove("on");
+    const ico = autoBtn.querySelector(".ico");
+    if (ico) ico.textContent = "▶️";
+    // 现状面板无独立图标节点，emoji 前缀写在文字里；其余方案 emoji 在 .ico 内
+    autoBtn.lastChild.textContent = kind === "now" ? "▶️ 自动播放" : "自动播放";
+  }
+
+  function startAuto() {
+    stopAuto();
+    autoOn = true;
+    autoBtn.classList.add("on");
+    const ico = autoBtn.querySelector(".ico");
+    if (ico) ico.textContent = "⏹️";
+    autoBtn.lastChild.textContent = kind === "now" ? "⏹️ 停止" : "停止";
+    autoTimer = setInterval(() => {
+      index = (index + 1) % cards.length;
+      render();
+    }, AUTO_DEMO_MS);
+  }
+
+  const wire = (sel, fn) => { const el = q(sel); if (el) el.addEventListener("click", fn); };
+  wire("[data-prev]", () => { stopAuto(); index = (index - 1 + cards.length) % cards.length; render(); });
+  wire("[data-next]", () => { stopAuto(); index = (index + 1) % cards.length; render(); });
+  wire("[data-reset]", () => { stopAuto(); index = 0; render(); });
+  wire("[data-auto]", () => { autoOn ? stopAuto() : startAuto(); });
+  // 效果图不发声，只做视觉脉冲，提示这里是发音按钮
+  wire("[data-speak]", () => {
+    speakBtn.animate(
+      [{ transform: "scale(1)" }, { transform: "scale(.94)" }, { transform: "scale(1)" }],
+      { duration: 260, easing: "ease-out" }
+    );
+  });
+
+  render();
+});
+</script>
+</body>
+</html>

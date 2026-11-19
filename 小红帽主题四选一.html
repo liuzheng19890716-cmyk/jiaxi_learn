@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>方案 A 变体 · 童话绘本 + 小红帽主题（四选一）</title>
+<style>
+/* ========================= 预览页外壳 ========================= */
+:root{
+  color-scheme:light;
+  font-family:"Microsoft YaHei","PingFang SC",sans-serif;
+  --chrome:#f1f3f7; --panel:#fff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:30px 18px 64px;background:var(--chrome);color:var(--ink);line-height:1.62}
+.wrap{max-width:1420px;margin:0 auto}
+.badge{display:inline-block;margin-bottom:10px;padding:4px 12px;border-radius:999px;background:#b3261e;color:#fff;font-size:12px;font-weight:800;letter-spacing:1px}
+header.page h1{margin:0 0 6px;font-size:29px;letter-spacing:.4px}
+header.page p{margin:0 0 4px;color:var(--muted);font-size:15px;max-width:1000px}
+.notice{margin:18px 0 4px;background:#fffbeb;border:1px solid #fde68a;border-left:5px solid #f59e0b;border-radius:12px;padding:12px 16px;font-size:13.5px;color:#78350f}
+.notice b{color:#92400e}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:20px;margin-top:26px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 2px 12px rgba(16,24,40,.05)}
+.panel-head{margin-bottom:12px}
+.tag{display:inline-block;padding:3px 10px;border-radius:8px;font-size:12px;font-weight:800;letter-spacing:.4px}
+.panel-head h2{margin:8px 0 2px;font-size:20px}
+.panel-head .sub{margin:0;color:var(--muted);font-size:13px}
+.points{margin:12px 0 0;padding:0 0 0 17px;font-size:13px;color:#374151}
+.points li{margin-bottom:5px}
+.points li b{color:#111827}
+.sec{margin-top:32px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px}
+.sec h3{margin:0 0 12px;font-size:18px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid var(--line);padding:8px 9px;text-align:left;vertical-align:top}
+th{background:#f8fafc;font-weight:700}
+td.good{color:#166534}td.warn{color:#9a3412}
+.note-strip{margin-top:12px;font-size:12.5px;color:var(--muted);text-align:center}
+
+/* ========================= 手机外框 ========================= */
+.frame{
+  position:relative;width:100%;max-width:376px;margin:0 auto;padding:24px 16px 24px;
+  border-radius:30px;overflow:hidden;isolation:isolate;min-height:622px;
+  background:var(--bg);border:1px solid rgba(0,0,0,.07);
+}
+.frame::before{content:"";position:absolute;inset:0;background:var(--deco,none);opacity:var(--deco-op,0);pointer-events:none;z-index:0}
+.frame>*{position:relative;z-index:2}
+.d-item{position:absolute;pointer-events:none;z-index:1;line-height:1;filter:var(--d-filter,none)}
+
+/* ---------- 进度圆点 ---------- */
+.dots{display:flex;gap:6px;justify-content:center;margin-bottom:13px;z-index:3}
+.dots i{width:9px;height:9px;border-radius:var(--dot-radius,50%);background:var(--dot-off);transition:all .2s ease}
+.dots i.on{width:22px;background:var(--dot-on);box-shadow:var(--dot-shadow,none)}
+
+/* ---------- 卡片 ---------- */
+.card-wrap{position:relative;z-index:2;padding:var(--wrap-pad,0);border-radius:var(--wrap-radius,0);
+  background:var(--wrap-bg,transparent);box-shadow:var(--wrap-shadow,none)}
+/* 注意：卡片底色最终由 JS 按词表的 color 字段设置（与 index.html 一致），
+   此处 --card-bg 只作为脚本生效前的初始底色 */
+.card{
+  position:relative;min-height:334px;padding:20px 14px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;text-align:center;
+  border-radius:var(--card-radius,36px);background:var(--card-bg,#ffffff);
+  border:var(--card-border,6px solid #fff);box-shadow:var(--card-shadow,none);
+  transition:background-color .22s ease;overflow:var(--card-overflow,visible);
+}
+.orn{position:absolute;inset:var(--orn-inset,9px);border:var(--orn-border,0);border-radius:var(--orn-radius,0);pointer-events:none}
+.ribbon{position:absolute;top:var(--rib-top,-8px);left:50%;transform:translateX(-50%);z-index:5;
+  width:var(--rib-w,26px);height:var(--rib-h,70px);
+  background:linear-gradient(180deg,#e05a4a 0%,#bd3327 100%);
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);
+  filter:drop-shadow(0 3px 4px rgba(90,20,15,.28))}
+.emoji-pad{width:var(--pad,94px);height:var(--pad,94px);border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:var(--pad-bg,rgba(255,255,255,.62));border:var(--pad-border,0);box-shadow:var(--pad-shadow,none);margin-bottom:6px}
+.emoji{font-size:var(--emoji-size,56px);line-height:1.1}
+.char{margin:0;font-size:var(--char-size,134px);font-weight:var(--char-weight,800);line-height:1.02;
+  color:var(--ink);text-shadow:var(--char-shadow,none);letter-spacing:var(--char-ls,0)}
+.pinyin{font-size:var(--pinyin-size,19px);font-weight:700;color:var(--ink-soft);letter-spacing:.5px}
+.word{font-size:var(--word-size,24px);font-weight:800;color:var(--ink);margin-top:2px}
+
+/* ---------- 按钮 ---------- */
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px;z-index:3}
+.btn{
+  min-height:var(--btn-h,76px);padding:8px 6px;border:var(--btn-border,3px solid rgba(255,253,246,.9));
+  border-radius:var(--btn-radius,22px);font-family:inherit;font-size:var(--btn-size,19px);font-weight:800;
+  color:var(--btn-ink);cursor:pointer;touch-action:manipulation;
+  background:var(--bg-c);box-shadow:0 var(--btn-depth,7px) 0 var(--shadow-c);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:transform .08s ease,box-shadow .08s ease,background-color .16s ease;
+}
+.btn .ico{font-size:var(--btn-ico,22px);line-height:1}
+.btn:active{transform:translateY(var(--btn-press,4px));box-shadow:0 2px 0 var(--shadow-c)}
+.btn.on{background:var(--bg-on,var(--bg-c));box-shadow:0 var(--btn-depth,7px) 0 var(--shadow-on,var(--shadow-c));color:var(--ink-on,var(--btn-ink))}
+.btn.on:active{transform:translateY(var(--btn-press,4px));box-shadow:0 2px 0 var(--shadow-on,var(--shadow-c))}
+
+/* ---------- 重置（已移出主操作区） ---------- */
+.reset{position:absolute;right:13px;top:13px;z-index:7;width:42px;height:42px;border-radius:var(--reset-radius,50%);
+  background:var(--reset-bg,rgba(255,253,246,.92));border:var(--reset-border,2px solid rgba(0,0,0,.1));
+  font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--reset-shadow,0 3px 0 rgba(0,0,0,.12));font-family:inherit;color:var(--ink)}
+
+/* ---------- 小红帽吉祥物 ---------- */
+.hood{position:absolute;z-index:6;width:var(--hood-w,48px);height:var(--hood-h,54px);
+  background:linear-gradient(165deg,#f2705f 0%,#d63f33 100%);
+  border:var(--hood-border,0);border-radius:50% 50% 42% 42%/56% 56% 44% 44%;
+  box-shadow:var(--hood-shadow,0 3px 0 rgba(140,28,22,.25))}
+.hood .tip{position:absolute;left:50%;top:calc(-1 * var(--tip-h,9px));transform:translateX(-50%);
+  width:40%;height:var(--tip-h,9px);background:linear-gradient(165deg,#f5806f,#dc4c3f);
+  border:var(--hood-border,0);border-bottom:0;border-radius:52% 52% 28% 28%}
+.hood .face{position:absolute;left:50%;top:50%;transform:translate(-50%,-44%);
+  width:62%;height:56%;border-radius:50% 50% 46% 46%;background:#ffe7d6;
+  box-shadow:inset 0 -3px 4px rgba(214,150,120,.28)}
+.hood .eye-l,.hood .eye-r{position:absolute;top:40%;width:14%;height:17%;border-radius:50%;background:#4a3328}
+.hood .eye-l{left:25%}.hood .eye-r{right:25%}
+.hood .blush-l,.hood .blush-r{position:absolute;top:63%;width:19%;height:12%;border-radius:50%;background:rgba(240,140,130,.5)}
+.hood .blush-l{left:12%}.hood .blush-r{right:12%}
+.basket{position:absolute;z-index:6;font-size:var(--basket-size,22px);filter:drop-shadow(0 2px 2px rgba(0,0,0,.18))}
+
+/* =====================================================================
+   主题 1 · 森林晨光（柔和水彩绘本）
+   ===================================================================== */
+.t1{
+  --bg:linear-gradient(180deg,#fff7e2 0%,#e9f6e3 48%,#dcf0f7 100%);
+  --deco:
+    radial-gradient(230px 170px at 13% 3%,rgba(255,212,112,.6) 0%,rgba(255,212,112,0) 70%),
+    conic-gradient(from 196deg at 13% 1%,rgba(255,238,180,0) 0deg,rgba(255,236,175,.45) 7deg,rgba(255,238,180,0) 14deg,rgba(255,236,175,.34) 24deg,rgba(255,238,180,0) 33deg,rgba(255,236,175,.26) 44deg,rgba(255,238,180,0) 54deg);
+  --deco-op:1;
+  --ink:#4a3f33;--ink-soft:#8a7a63;
+  --card-radius:36px;--card-border:6px solid #fffdf6;
+  --card-shadow:0 12px 0 rgba(122,96,58,.10),0 20px 36px rgba(122,96,58,.13);
+  --pad:94px;--pad-bg:rgba(255,253,246,.68);--pad-shadow:inset 0 0 0 3px rgba(255,255,255,.72);
+  --char-size:134px;--char-weight:800;--char-shadow:0 3px 0 rgba(255,255,255,.7);
+  --emoji-size:56px;--pinyin-size:19px;--word-size:24px;
+  --btn-radius:22px;--btn-h:76px;--btn-size:19px;--btn-ico:22px;--btn-ink:#4a3b2f;
+  --btn-border:3px solid rgba(255,253,246,.9);--btn-press:4px;
+  --dot-off:rgba(122,96,58,.24);--dot-on:#d63f33;--dot-shadow:0 2px 0 rgba(140,28,22,.22);
+  --reset-bg:rgba(255,253,246,.92);--reset-border:2px solid rgba(122,96,58,.16);
+  --hood-w:48px;--hood-h:54px;
+}
+.t1 .c-prev{--bg-c:#f7cfae;--shadow-c:#dda97f}
+.t1 .c-speak{--bg-c:#ffe294;--shadow-c:#e0b458}
+.t1 .c-auto{--bg-c:#e9a9a2;--shadow-c:#c9807a;--bg-on:#d63f33;--shadow-on:#a02b22;--ink-on:#fff}
+.t1 .c-next{--bg-c:#bfe3b0;--shadow-c:#8fc27f}
+
+/* =====================================================================
+   主题 2 · 童话绘本（书页 + 金边 + 红丝带书签）
+   ===================================================================== */
+.t2{
+  --bg:linear-gradient(180deg,#fdf4e4 0%,#f8e9d2 55%,#f1dcc2 100%);
+  --deco:
+    radial-gradient(620px 300px at 50% -10%,rgba(255,255,255,.75),transparent 70%),
+    radial-gradient(520px 280px at 50% 110%,rgba(120,90,50,.2),transparent 72%),
+    repeating-linear-gradient(90deg,rgba(160,132,90,.045) 0 1px,transparent 1px 7px);
+  --deco-op:1;
+  --ink:#4a3524;--ink-soft:#8d7055;
+  --card-radius:20px;--card-border:5px solid #f7e6c8;
+  --card-shadow:0 0 0 2px #d9b877,0 10px 26px rgba(120,86,44,.22),0 5px 0 rgba(217,184,119,.5);
+  --orn-border:1.5px dashed rgba(191,150,90,.6);--orn-radius:13px;--orn-inset:9px;
+  --pad:90px;--pad-bg:rgba(255,252,244,.78);--pad-shadow:inset 0 0 0 2px rgba(217,184,119,.5);
+  --char-size:136px;--char-weight:800;--char-shadow:0 2px 0 rgba(217,184,119,.34);
+  --emoji-size:54px;--pinyin-size:19px;--word-size:24px;
+  --btn-radius:18px;--btn-h:74px;--btn-size:19px;--btn-ico:21px;--btn-ink:#4a3524;
+  --btn-border:2.5px solid rgba(255,252,244,.95);--btn-press:3px;--btn-depth:6px;
+  --dot-off:rgba(141,112,85,.28);--dot-on:#c0392b;--dot-shadow:0 2px 0 rgba(140,40,30,.2);
+  --reset-bg:#fffdf6;--reset-border:2px solid rgba(191,150,90,.6);--reset-shadow:0 3px 0 rgba(191,150,90,.5);
+  --rib-top:-9px;
+  --hood-w:44px;--hood-h:50px;
+}
+.t2 .c-prev{--bg-c:#f2cda6;--shadow-c:#d3a877}
+.t2 .c-speak{--bg-c:#f8e2a8;--shadow-c:#d9bd7c}
+.t2 .c-auto{--bg-c:#e6a9a0;--shadow-c:#c5837b;--bg-on:#c0392b;--shadow-on:#8e281e;--ink-on:#fff8ef}
+.t2 .c-next{--bg-c:#d3e3bd;--shadow-c:#a9c08d}
+
+/* =====================================================================
+   主题 3 · 小红帽野餐（红白格纹 + 花丛）
+   ===================================================================== */
+.t3{
+  --bg:linear-gradient(180deg,#fff5f3 0%,#ffe9e5 42%,#f2f9e9 100%);
+  --deco:
+    repeating-linear-gradient(0deg,rgba(214,63,51,.09) 0 11px,transparent 11px 22px),
+    repeating-linear-gradient(90deg,rgba(214,63,51,.09) 0 11px,transparent 11px 22px);
+  --deco-op:.9;
+  --ink:#4a3028;--ink-soft:#96705f;
+  --wrap-pad:7px;--wrap-radius:36px;
+  --wrap-bg-image:repeating-linear-gradient(90deg,rgba(214,63,51,.5) 0 9px,transparent 9px 18px),repeating-linear-gradient(0deg,rgba(214,63,51,.5) 0 9px,transparent 9px 18px);
+  --wrap-shadow:0 12px 0 rgba(214,63,51,.15),0 20px 36px rgba(120,60,50,.15);
+  --card-radius:29px;--card-border:5px solid #fff;
+  --card-shadow:none;
+  --pad:92px;--pad-bg:rgba(255,255,255,.72);--pad-shadow:inset 0 0 0 3px rgba(255,255,255,.85);
+  --char-size:134px;--char-weight:800;--char-shadow:0 3px 0 rgba(255,255,255,.75);
+  --emoji-size:56px;--pinyin-size:19px;--word-size:24px;
+  --btn-radius:22px;--btn-h:76px;--btn-size:19px;--btn-ico:22px;--btn-ink:#4a3028;
+  --btn-border:3px solid rgba(255,255,255,.92);--btn-press:4px;
+  --dot-radius:3px;--dot-off:rgba(150,112,95,.32);--dot-on:#d63f33;--dot-shadow:0 2px 0 rgba(140,28,22,.22);
+  --reset-bg:#fff;--reset-border:2px solid rgba(214,63,51,.45);--reset-shadow:0 3px 0 rgba(214,63,51,.3);
+  --hood-w:50px;--hood-h:56px;
+}
+.t3 .card-wrap{
+  background-color:#fff;
+  background-image:
+    repeating-linear-gradient(90deg,rgba(214,63,51,.5) 0 9px,transparent 9px 18px),
+    repeating-linear-gradient(0deg,rgba(214,63,51,.5) 0 9px,transparent 9px 18px);
+}
+.t3 .c-prev{--bg-c:#ffc2ab;--shadow-c:#e39a80}
+.t3 .c-speak{--bg-c:#ffd970;--shadow-c:#e0b044}
+.t3 .c-auto{--bg-c:#f09a9a;--shadow-c:#cf7474;--bg-on:#d63f33;--shadow-on:#9e2a20;--ink-on:#fff}
+.t3 .c-next{--bg-c:#b4e6a8;--shadow-c:#88c47c}
+
+/* =====================================================================
+   主题 4 · 手绘动画（赛璐璐平涂 + 粗描边 + 硬阴影）
+   ===================================================================== */
+.t4{
+  --bg:linear-gradient(180deg,#bfe4f7 0%,#dcefd6 58%,#f7eec8 100%);
+  --ink:#2f3547;--ink-soft:#5c6478;
+  --card-radius:24px;--card-border:5px solid #2f3547;
+  --card-shadow:7px 7px 0 rgba(47,53,71,.92);
+  --pad:92px;--pad-bg:#fff;--pad-border:3.5px solid #2f3547;
+  --char-size:138px;--char-weight:800;
+  --emoji-size:54px;--pinyin-size:19px;--word-size:24px;
+  --btn-radius:17px;--btn-h:78px;--btn-size:19px;--btn-ico:23px;--btn-ink:#2f3547;
+  --btn-border:4px solid #2f3547;--btn-press:5px;--btn-depth:6px;
+  --dot-off:rgba(47,53,71,.2);--dot-on:#e0453a;--dot-shadow:0 0 0 3px #2f3547;
+  --reset-bg:#fff;--reset-border:3.5px solid #2f3547;--reset-radius:14px;--reset-shadow:3px 3px 0 rgba(47,53,71,.9);
+  --hood-w:52px;--hood-h:58px;--hood-border:4px solid #2f3547;--hood-shadow:4px 4px 0 rgba(47,53,71,.9);
+  --d-filter:drop-shadow(2px 2px 0 rgba(47,53,71,.28));
+}
+.t4 .c-prev{--bg-c:#ffb27a;--shadow-c:#2f3547}
+.t4 .c-speak{--bg-c:#ffd84d;--shadow-c:#2f3547}
+.t4 .c-auto{--bg-c:#f08a80;--shadow-c:#2f3547;--bg-on:#e0453a;--shadow-on:#2f3547;--ink-on:#fff}
+.t4 .c-next{--bg-c:#7fd48a;--shadow-c:#2f3547}
+.t4 .cloud{position:absolute;background:#fff;border:4px solid #2f3547;border-radius:999px;z-index:1}
+.t4 .btn .ico{filter:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page">
+  <span class="badge">方案 A 变体 · 四选一</span>
+  <h1>童话绘本风 + 小红帽主题</h1>
+  <p>四套都建立在<b>方案 A 的骨架</b>上：立体糖果按钮（白描边 + 厚底阴影 + 按下下沉）、圆点进度、Emoji 圆形底托、重置移到右上角。差别在<b>画面气质</b>。<b>每个方案的按钮都能点</b>，自动播放为 3.4 秒一张的无声演示，只为感受节奏。</p>
+  <p>四套共有的小红帽元素：CSS 手绘的红帽小女孩吉祥物（红斗篷 + 尖顶兜帽 + 脸蛋腮红）＋ 🧺 篮子，红帽色 <code>#d63f33</code> 统一作为进度点与「自动播放」按钮的主色。</p>
+  <div class="notice">
+    <b>两点必须说清楚的边界：</b><br>
+    ① <b>不能用真正的迪士尼素材</b>。米老鼠等角色形象、Logo、动画截图受商标与版权保护，商用或分发都有侵权风险。下面做的是<b>手绘童话绘本的美学风格</b>（暖色、圆润、水彩质感、故事书装帧），不是任何具体 IP 的复制。小红帽本身是格林/佩罗的公版童话，元素可自由使用。<br>
+    ② <b>受 AGENTS.md「不引入外部图片资源」约束</b>，所有插画只能用 CSS 绘制 + Emoji 拼贴，因此精度上限是「精致 CSS 插画」，到不了真正的赛璐璐动画质感。<b>我刻意没有画大灰狼</b>——🐺 对 3 岁孩子可能造成惊吓，与「颜色柔和」的设计规范冲突。<br>
+    ③ 若想要更丰富的插画，唯一合规路径是<b>内联手绘 SVG</b>（仍单文件、不联网、不算外部资源），能把红帽女孩、森林、小屋画到接近真正插画稿的水平。这需要你明确同意放宽「图案用 Emoji」这条约束，我没有擅自做。
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- ============ 主题 1 ============ -->
+  <article class="panel">
+    <div class="panel-head">
+      <span class="tag" style="background:#fff4e0;color:#a16207">主题 1 · 推荐</span>
+      <h2>森林晨光</h2>
+      <p class="sub">柔和水彩绘本 · 阳光透过树梢 · 最安静耐看</p>
+    </div>
+    <div class="frame t1" data-demo="t1">
+      <span class="d-item" style="left:6px;top:6px;font-size:40px;opacity:.3">🌲</span>
+      <span class="d-item" style="right:8px;top:2px;font-size:34px;opacity:.26">🌳</span>
+      <span class="d-item" style="left:24px;top:52px;font-size:17px;opacity:.5">🍃</span>
+      <span class="d-item" style="right:30px;top:96px;font-size:15px;opacity:.45">🍂</span>
+      <span class="d-item" style="left:12px;bottom:150px;font-size:16px;opacity:.4">🌿</span>
+      <span class="d-item" style="right:14px;bottom:190px;font-size:18px;opacity:.35">🌸</span>
+      <button class="reset" data-reset type="button" title="回到第一张">🏠</button>
+      <div class="dots" data-dots></div>
+      <div class="card-wrap">
+        <section class="card" data-card>
+          <div class="emoji-pad"><div class="emoji" data-emoji>☀️</div></div>
+          <h1 class="char" data-char>日</h1>
+          <div class="pinyin" data-pinyin>rì</div>
+          <div class="word" data-word>太阳</div>
+        </section>
+      </div>
+      <div class="hood" style="left:14px;bottom:196px"><span class="tip"></span><span class="face"><i class="eye-l"></i><i class="eye-r"></i><i class="blush-l"></i><i class="blush-r"></i></span></div>
+      <span class="basket" style="left:56px;bottom:190px">🧺</span>
+      <div class="actions">
+        <button class="btn c-prev" data-prev type="button"><span class="ico">⬅️</span>上一张</button>
+        <button class="btn c-speak" data-speak type="button"><span class="ico">🔊</span>读一读</button>
+        <button class="btn c-auto" data-auto type="button"><span class="ico">▶️</span>自动播放</button>
+        <button class="btn c-next" data-next type="button"><span class="ico">➡️</span>下一张</button>
+      </div>
+    </div>
+    <ul class="points">
+      <li><b>晨光</b>：左上角暖黄光晕 + 放射光束，像清晨阳光穿过树梢，是整个方案的情绪来源。</li>
+      <li><b>森林</b>：顶部两棵淡树 + 飘落的叶与花，装饰极克制，不抢汉字注意力。</li>
+      <li><b>小红帽</b>：女孩站在卡片左下角、提着篮子，像正要出发走进森林——与「翻页＝往前走」的动作隐喻一致。</li>
+      <li><b>配色</b>：奶油→薄荷→天空的三段渐变，四套里最柔和；红帽色只出现在进度点和自动播放按钮上，是唯一的视觉焦点。</li>
+      <li><b>风险最低</b>：装饰最少、对比适中，长时间看不累，最贴合「颜色柔和、界面元素少」。</li>
+    </ul>
+  </article>
+
+  <!-- ============ 主题 2 ============ -->
+  <article class="panel">
+    <div class="panel-head">
+      <span class="tag" style="background:#fef3e2;color:#92600a">主题 2</span>
+      <h2>童话绘本</h2>
+      <p class="sub">书页 + 金色双线框 + 红丝绒书签 · 最有「书」的感觉</p>
+    </div>
+    <div class="frame t2" data-demo="t2">
+      <span class="d-item" style="left:10px;top:10px;font-size:15px;opacity:.5;color:#c9a227">✦</span>
+      <span class="d-item" style="right:56px;top:16px;font-size:12px;opacity:.45;color:#c9a227">✦</span>
+      <span class="d-item" style="left:30px;bottom:150px;font-size:13px;opacity:.4;color:#c9a227">✦</span>
+      <span class="d-item" style="right:16px;bottom:200px;font-size:16px;opacity:.35">🌲</span>
+      <span class="d-item" style="left:10px;bottom:104px;font-size:18px;opacity:.3">🌳</span>
+      <button class="reset" data-reset type="button" title="回到第一张">🏠</button>
+      <div class="dots" data-dots></div>
+      <div class="card-wrap">
+        <section class="card" data-card>
+          <div class="ribbon"></div>
+          <div class="orn"></div>
+          <div class="emoji-pad"><div class="emoji" data-emoji>☀️</div></div>
+          <h1 class="char" data-char>日</h1>
+          <div class="pinyin" data-pinyin>rì</div>
+          <div class="word" data-word>太阳</div>
+        </section>
+      </div>
+      <div class="hood" style="right:16px;bottom:198px"><span class="tip"></span><span class="face"><i class="eye-l"></i><i class="eye-r"></i><i class="blush-l"></i><i class="blush-r"></i></span></div>
+      <span class="basket" style="right:58px;bottom:192px">🧺</span>
+      <div class="actions">
+        <button class="btn c-prev" data-prev type="button"><span class="ico">⬅️</span>上一张</button>
+        <button class="btn c-speak" data-speak type="button"><span class="ico">🔊</span>读一读</button>
+        <button class="btn c-auto" data-auto type="button"><span class="ico">▶️</span>自动播放</button>
+        <button class="btn c-next" data-next type="button"><span class="ico">➡️</span>下一张</button>
+      </div>
+    </div>
+    <ul class="points">
+      <li><b>书页质感</b>：卡片做成绘本内页——米白纸面 + 金色双线描边 + 内层金色虚线框，像老式童话绘本的装帧。</li>
+      <li><b>红丝绒书签</b>：卡片顶部垂下一条红色缎带书签（带 V 形燕尾），既是小红帽的红色呼应，也天然表达「读到哪一页了」。</li>
+      <li><b>金色星点</b>：三处 ✦ 微弱点缀，增加童话感但不喧闹。</li>
+      <li><b>气质</b>：四套里最「静」、最有仪式感，适合睡前亲子共读。</li>
+      <li><b>取舍</b>：金边 + 虚线框使画面细节变多，3 岁孩子的注意力可能落在书签而非汉字上；按钮圆角更小，玩具感弱于主题 1。</li>
+    </ul>
+  </article>
+
+  <!-- ============ 主题 3 ============ -->
+  <article class="panel">
+    <div class="panel-head">
+      <span class="tag" style="background:#ffe9e6;color:#b3261e">主题 3</span>
+      <h2>小红帽野餐</h2>
+      <p class="sub">红白格纹野餐布 + 花丛蝴蝶 · 最活泼明快</p>
+    </div>
+    <div class="frame t3" data-demo="t3">
+      <span class="d-item" style="left:8px;top:8px;font-size:20px;opacity:.6">🌷</span>
+      <span class="d-item" style="right:58px;top:14px;font-size:17px;opacity:.5">🌼</span>
+      <span class="d-item" style="left:26px;bottom:158px;font-size:18px;opacity:.5">🌼</span>
+      <span class="d-item" style="right:12px;bottom:210px;font-size:20px;opacity:.55">🦋</span>
+      <span class="d-item" style="right:26px;top:96px;font-size:15px;opacity:.4">🌸</span>
+      <button class="reset" data-reset type="button" title="回到第一张">🏠</button>
+      <div class="dots" data-dots></div>
+      <div class="card-wrap">
+        <section class="card" data-card>
+          <div class="emoji-pad"><div class="emoji" data-emoji>☀️</div></div>
+          <h1 class="char" data-char>日</h1>
+          <div class="pinyin" data-pinyin>rì</div>
+          <div class="word" data-word>太阳</div>
+        </section>
+      </div>
+      <div class="hood" style="left:16px;bottom:196px"><span class="tip"></span><span class="face"><i class="eye-l"></i><i class="eye-r"></i><i class="blush-l"></i><i class="blush-r"></i></span></div>
+      <span class="basket" style="left:60px;bottom:188px;font-size:26px">🧺</span>
+      <div class="actions">
+        <button class="btn c-prev" data-prev type="button"><span class="ico">⬅️</span>上一张</button>
+        <button class="btn c-speak" data-speak type="button"><span class="ico">🔊</span>读一读</button>
+        <button class="btn c-auto" data-auto type="button"><span class="ico">▶️</span>自动播放</button>
+        <button class="btn c-next" data-next type="button"><span class="ico">➡️</span>下一张</button>
+      </div>
+    </div>
+    <ul class="points">
+      <li><b>红白格纹</b>：卡片外框做成格纹野餐布（CSS 双向 repeating-gradient 叠出经典 gingham），背景也有极淡的格纹呼应。这是小红帽最直接的符号——篮子上的布。</li>
+      <li><b>方形进度点</b>：进度点改成小方块，与格纹语言统一，是四套里唯一非圆点的。</li>
+      <li><b>花丛与蝴蝶</b>：🌷🌼🦋 散布，篮子放大到 26px，画面最热闹。</li>
+      <li><b>配色</b>：饱和度四套中最高，最「甜」，孩子第一眼最容易喜欢。</li>
+      <li><b>取舍</b>：格纹是重复图案，视觉信息量大，可能分散对汉字的注意；红白格纹 + 红色进度点 + 红色按钮叠加，红色占比偏高。</li>
+    </ul>
+  </article>
+
+  <!-- ============ 主题 4 ============ -->
+  <article class="panel">
+    <div class="panel-head">
+      <span class="tag" style="background:#e6f0fa;color:#1d4ed8">主题 4</span>
+      <h2>手绘动画</h2>
+      <p class="sub">赛璐璐平涂 + 粗描边 + 硬阴影 · 最像动画片截图</p>
+    </div>
+    <div class="frame t4" data-demo="t4">
+      <span class="cloud" style="left:14px;top:16px;width:64px;height:26px"></span>
+      <span class="cloud" style="right:64px;top:52px;width:46px;height:20px"></span>
+      <span class="d-item" style="right:16px;top:8px;font-size:36px">☀️</span>
+      <span class="d-item" style="left:4px;bottom:152px;font-size:44px">🌲</span>
+      <span class="d-item" style="right:6px;bottom:158px;font-size:38px">🌳</span>
+      <span class="d-item" style="left:64px;bottom:146px;font-size:26px;opacity:.85">🌲</span>
+      <button class="reset" data-reset type="button" title="回到第一张">🏠</button>
+      <div class="dots" data-dots></div>
+      <div class="card-wrap">
+        <section class="card" data-card>
+          <div class="emoji-pad"><div class="emoji" data-emoji>☀️</div></div>
+          <h1 class="char" data-char>日</h1>
+          <div class="pinyin" data-pinyin>rì</div>
+          <div class="word" data-word>太阳</div>
+        </section>
+      </div>
+      <div class="hood" style="left:20px;bottom:206px"><span class="tip"></span><span class="face"><i class="eye-l"></i><i class="eye-r"></i><i class="blush-l"></i><i class="blush-r"></i></span></div>
+      <span class="basket" style="left:66px;bottom:198px;font-size:24px">🧺</span>
+      <div class="actions">
+        <button class="btn c-prev" data-prev type="button"><span class="ico">⬅️</span>上一张</button>
+        <button class="btn c-speak" data-speak type="button"><span class="ico">🔊</span>读一读</button>
+        <button class="btn c-auto" data-auto type="button"><span class="ico">▶️</span>自动播放</button>
+        <button class="btn c-next" data-next type="button"><span class="ico">➡️</span>下一张</button>
+      </div>
+    </div>
+    <ul class="points">
+      <li><b>赛璐璐平涂</b>：所有元素统一 4-5px 深蓝黑粗描边 + <b>无模糊硬阴影</b>（7px 实心偏移），这是经典手绘动画/贴纸的标志性画法，四套里最「卡通」。</li>
+      <li><b>描边云朵</b>：CSS 画的白云带深色轮廓，配 ☀️ 和成排 🌲，构成完整的动画场景。</li>
+      <li><b>按下下沉 5px</b>：四套里按键位移最大，配合硬阴影，触感反馈最强烈、最像实体玩具。</li>
+      <li><b>对比度最高</b>：粗描边让按钮和卡片边界极其清晰，对视力发育中的幼儿反而更易辨识。</li>
+      <li><b>取舍</b>：饱和度与对比都最高，画面最「吵」，长时间看容易兴奋；深蓝黑描边偏冷，与「颜色柔和」的规范有一定张力。</li>
+    </ul>
+  </article>
+</div>
+
+<!-- ============ 横向对比 ============ -->
+<section class="sec">
+  <h3>四套横向对比</h3>
+  <table>
+    <tr>
+      <th style="width:15%">维度</th>
+      <th style="width:21%">1 · 森林晨光</th>
+      <th style="width:21%">2 · 童话绘本</th>
+      <th style="width:21%">3 · 小红帽野餐</th>
+      <th style="width:22%">4 · 手绘动画</th>
+    </tr>
+    <tr><td><b>核心符号</b></td><td>晨光 + 森林小径</td><td>书页金边 + 红丝带书签</td><td>红白格纹野餐布</td><td>粗描边赛璐璐场景</td></tr>
+    <tr><td><b>小红帽呈现</b></td><td>女孩 + 篮子站在卡片左下，正要出发</td><td>女孩在右下，红色书签呼应斗篷</td><td class="good">女孩 + 大篮子 + 格纹布，符号最强</td><td>女孩带粗描边，像动画角色设定</td></tr>
+    <tr><td><b>色彩刺激度</b></td><td class="good">低（奶油水彩）</td><td class="good">低（米纸大地色）</td><td class="warn">高（饱和糖果色）</td><td class="warn">最高（平涂 + 深色描边）</td></tr>
+    <tr><td><b>画面信息量</b></td><td class="good">最少，注意力最集中于汉字</td><td>中（金边 + 书签 + 星点）</td><td class="warn">多（格纹 + 花草蝴蝶）</td><td class="warn">多（云 + 太阳 + 树林）</td></tr>
+    <tr><td><b>按钮触感</b></td><td>下沉 4px，柔和</td><td>下沉 3px，最内敛</td><td>下沉 4px，明快</td><td class="good">下沉 5px + 硬阴影，最强</td></tr>
+    <tr><td><b>汉字辨识度</b></td><td>好（白底衬字）</td><td class="good">好（纸面 + 金色微投影）</td><td>好</td><td class="good">最好（粗描边界定边界）</td></tr>
+    <tr><td><b>气质定位</b></td><td>清晨散步、温柔</td><td>睡前故事、仪式感</td><td>郊游野餐、欢乐</td><td>动画片、玩具感</td></tr>
+    <tr><td><b>主要风险</b></td><td>装饰偏少，可能觉得「不够梦幻」</td><td>书签可能抢走对汉字的注意</td><td>格纹重复图案干扰；红色占比偏高</td><td>偏冷偏吵，与「颜色柔和」有张力</td></tr>
+    <tr><td><b>改动成本</b></td><td colspan="4">四套<b>都只改 CSS + 少量 HTML 结构</b>；已验证的自动播放状态机、语音逻辑、10 字词表<b>一律不动</b>。JS 仅需新增「渲染进度圆点」约 10 行。主题 2 多一个书签元素，主题 3 多一层格纹包裹，主题 4 多几个云朵/树装饰。</td></tr>
+  </table>
+  <p class="note-strip">
+    <b>我的建议</b>：3 岁幼儿优先 <b>主题 1 森林晨光</b>——装饰最克制、色彩最柔和，符合 AGENTS.md「颜色柔和、界面元素少」，红帽女孩「出发走进森林」的意象又和翻页动作天然契合。
+    如果你要最强的「小红帽」辨识度，选 <b>主题 3</b>；要最像动画片、按键手感最好，选 <b>主题 4</b>；要睡前故事的仪式感，选 <b>主题 2</b>。
+    混搭也完全可行，例如「主题 1 的整体画面 + 主题 3 的格纹卡片框 + 主题 4 的 5px 按下位移」。
+  </p>
+</section>
+
+</div>
+
+<script>
+// 词表与 index.html 完全一致（color 即卡片底色，由数据驱动，四套主题都不改词表）
+const cards = [
+  { character:"日", pinyin:"rì",   emoji:"☀️", word:"太阳",   color:"#c9efff" },
+  { character:"月", pinyin:"yuè",  emoji:"🌙", word:"月亮",   color:"#e5d9ff" },
+  { character:"山", pinyin:"shān", emoji:"⛰️", word:"大山",   color:"#c9f0cf" },
+  { character:"水", pinyin:"shuǐ", emoji:"💧", word:"喝水",   color:"#bfe8f5" },
+  { character:"火", pinyin:"huǒ",  emoji:"🔥", word:"火苗",   color:"#ffd1bd" },
+  { character:"木", pinyin:"mù",   emoji:"🌳", word:"大树",   color:"#d7edb8" },
+  { character:"人", pinyin:"rén",  emoji:"🧑", word:"小朋友", color:"#ffe2aa" },
+  { character:"口", pinyin:"kǒu",  emoji:"👄", word:"嘴巴",   color:"#ffcbd6" },
+  { character:"手", pinyin:"shǒu", emoji:"✋", word:"小手",   color:"#f8dfa8" },
+  { character:"目", pinyin:"mù",   emoji:"👀", word:"眼睛",   color:"#d5dcff" }
+];
+
+const AUTO_DEMO_MS = 3400; // 无声演示：近似「读两遍约 1.6s + 停顿 3s」的节奏
+
+document.querySelectorAll(".frame").forEach((frame) => {
+  let index = 0, autoTimer = 0, autoOn = false;
+  const q = (s) => frame.querySelector(s);
+  const cardEl = q("[data-card]"), emojiEl = q("[data-emoji]"), charEl = q("[data-char]");
+  const pinyinEl = q("[data-pinyin]"), wordEl = q("[data-word]"), dotsEl = q("[data-dots]");
+  const autoBtn = q("[data-auto]"), speakBtn = q("[data-speak]");
+
+  for (let i = 0; i < cards.length; i++) dotsEl.appendChild(document.createElement("i"));
+
+  function render() {
+    const c = cards[index];
+    emojiEl.textContent = c.emoji;
+    charEl.textContent = c.character;
+    pinyinEl.textContent = c.pinyin;
+    wordEl.textContent = c.word;
+    cardEl.style.backgroundColor = c.color; // 与 index.html 一致：底色由词表驱动
+    dotsEl.querySelectorAll("i").forEach((d, i) => d.classList.toggle("on", i === index));
+  }
+
+  function setAutoBtn(on) {
+    autoBtn.classList.toggle("on", on);
+    const ico = autoBtn.querySelector(".ico");
+    if (ico) ico.textContent = on ? "⏹️" : "▶️";
+    autoBtn.lastChild.textContent = on ? "停止" : "自动播放";
+  }
+  function stopAuto() {
+    if (autoTimer) { clearInterval(autoTimer); autoTimer = 0; }
+    autoOn = false; setAutoBtn(false);
+  }
+  function startAuto() {
+    stopAuto(); autoOn = true; setAutoBtn(true);
+    autoTimer = setInterval(() => { index = (index + 1) % cards.length; render(); }, AUTO_DEMO_MS);
+  }
+
+  const wire = (sel, fn) => { const el = q(sel); if (el) el.addEventListener("click", fn); };
+  // 手动操作一律抢占自动播放，与 index.html 的行为保持一致
+  wire("[data-prev]", () => { stopAuto(); index = (index - 1 + cards.length) % cards.length; render(); });
+  wire("[data-next]", () => { stopAuto(); index = (index + 1) % cards.length; render(); });
+  wire("[data-reset]", () => { stopAuto(); index = 0; render(); });
+  wire("[data-auto]", () => { autoOn ? stopAuto() : startAuto(); });
+  wire("[data-speak]", () => {
+    // 效果图不发声，只做视觉脉冲，提示这里是发音按钮
+    if (speakBtn.animate) speakBtn.animate(
+      [{ transform: "scale(1)" }, { transform: "scale(.94)" }, { transform: "scale(1)" }],
+      { duration: 260, easing: "ease-out" }
+    );
+  });
+
+  render();
+});
+</script>
+</body>
+</html>

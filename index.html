@@ -6,10 +6,10 @@
   <title>汉字认读卡片</title>
   <style>
     :root {
-      color-scheme: light;
+      color-scheme: dark;
       font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-      background: #fff8e8;
-      color: #24324a;
+      background: radial-gradient(ellipse at 50% 0%, #395a91 0, #172646 43%, #10182d 100%);
+      color: #fff8e7;
     }
 
     * { box-sizing: border-box; }
@@ -20,6 +20,7 @@
       padding: 24px;
       display: grid;
       place-items: center;
+      background-image: radial-gradient(2px 2px at 8% 17%, #ffe9ad 99%, transparent), radial-gradient(1px 1px at 24% 9%, #fff 99%, transparent), radial-gradient(2px 2px at 87% 21%, #ffe9ad 99%, transparent), radial-gradient(1px 1px at 72% 8%, #fff 99%, transparent), radial-gradient(1px 1px at 93% 60%, #fff 99%, transparent);
     }
 
     main {
@@ -38,18 +39,18 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      border: 5px solid #ffffff;
+      border: 1px solid #f8df9b;
       border-radius: 34px;
-      background: #c9efff;
-      box-shadow: 0 10px 0 #b8dce9;
+      background: radial-gradient(ellipse at 50% 38%, #fff5c9 0, #f4d992 27%, #c89361 66%, #70537c 100%) !important;
+      box-shadow: 0 0 0 7px #f3d99a18, 0 22px 70px #050b1b88, inset 0 0 45px #fff5d655;
       text-align: center;
       transition: background-color 180ms ease;
     }
 
     .emoji { font-size: clamp(76px, 18vw, 112px); line-height: 1.15; }
-    .character { margin: 0; font-size: clamp(132px, 35vw, 190px); line-height: 1.05; font-weight: 800; }
-    .pinyin { font-size: 30px; font-weight: 700; }
-    .word { margin-top: 2px; font-size: 36px; font-weight: 700; }
+    .character { margin: 0; color: #3a3047; font-family: "STKaiti", "KaiTi", "Microsoft YaHei", serif; font-size: clamp(132px, 35vw, 190px); line-height: 1.05; font-weight: 900; text-shadow: 0 3px 0 #fff1c4, 0 9px 20px #6a493b42; }
+    .pinyin { color: #705943; font-size: 30px; font-weight: 700; letter-spacing: 4px; }
+    .word { margin-top: 8px; padding: 7px 24px; border: 1px solid #ffdf99; border-radius: 30px; background: #42324f; color: #fff8e9; font-size: 30px; font-weight: 700; }
 
     .actions {
       width: 100%;
@@ -63,24 +64,26 @@
       padding: 14px 12px;
       border: 0;
       border-radius: 24px;
-      color: #193047;
+      color: #fff4d9;
       font: inherit;
       font-size: clamp(22px, 5vw, 30px);
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 6px 0 rgba(30, 50, 70, 0.18);
+      background: #ffffff10;
+      border: 1px solid #d5c799;
+      box-shadow: 0 7px 22px #050b1c40;
       touch-action: manipulation;
     }
 
     button:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(30, 50, 70, 0.18); }
-    button:focus-visible { outline: 4px solid #24324a; outline-offset: 4px; }
+    button:focus-visible { outline: 4px solid #ffe7a8; outline-offset: 4px; }
     button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
-    .speak { background: #ffd66b; }
-    .next { background: #aee6a5; }
-    .previous { background: #ffc9b8; }
-    .autoplay { background: #dcc9ff; }
-    .autoplay.is-playing { background: #b795ff; box-shadow: 0 6px 0 rgba(90, 50, 160, 0.35); }
-    .counter { font-size: 24px; font-weight: 700; }
+    .speak { color: #493348; background: linear-gradient(180deg, #f5df9c, #c99a54); border-color: #fff0bc; box-shadow: 0 7px 24px #d19d4c55; }
+    .next { background: #ffffff10; }
+    .previous { background: #ffffff10; }
+    .autoplay { background: #544668; }
+    .autoplay.is-playing { background: #8c6cb1; box-shadow: 0 6px 0 rgba(90, 50, 160, 0.35); }
+    .counter { color: #e7d8b6; font-size: 24px; font-weight: 700; }
 
     .reset {
       position: fixed;
@@ -89,7 +92,8 @@
       min-height: 48px;
       padding: 8px 16px;
       border-radius: 16px;
-      background: #e2e8f0;
+      background: #544668;
+      color: #fff4d9;
       font-size: 18px;
       box-shadow: 0 4px 0 rgba(30, 50, 70, 0.18);
     }
