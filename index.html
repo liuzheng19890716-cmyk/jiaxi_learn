@@ -189,7 +189,7 @@
       isSpeaking = false;
     }
 
-    function showCard() {
+    function showCard(onDone, force) {
       const card = cards[currentIndex];
       emojiElement.textContent = card.emoji;
       characterElement.textContent = card.character;
@@ -197,11 +197,12 @@
       wordElement.textContent = card.word;
       cardElement.style.backgroundColor = card.color;
       counterElement.textContent = `第 ${currentIndex + 1} 张 / 共 ${cards.length} 张`;
+      speakCard(onDone, force);
     }
 
-    function step(delta) {
+    function step(delta, onDone, force) {
       currentIndex = (currentIndex + delta + cards.length) % cards.length;
-      showCard();
+      showCard(onDone, force);
     }
 
     function goTo(index) {
@@ -264,8 +265,7 @@
       autoAdvanceTimer = setTimeout(() => {
         autoAdvanceTimer = 0;
         if (!isAutoPlaying || runId !== autoRunId) return;
-        step(1);
-        playAuto(runId);
+        step(1, () => scheduleNext(runId), true);
       }, AUTO_PAUSE_MS);
     }
 
